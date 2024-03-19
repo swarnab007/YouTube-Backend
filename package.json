@@ -1,0 +1,15 @@
+{
+  "name": "youtube-backend",
+  "version": "1.0.0",
+  "description": "A Backend for a video streaming website like youTube",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "youtube",
+    "backend"
+  ],
+  "author": "Swarnab Banerjee",
+  "license": "ISC"
+}
