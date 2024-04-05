@@ -16,6 +16,10 @@ connectToDatabase()
     console.log("MongoDB connection error", error);
   });
 
+  app.get('/', (req, res) => {
+    res.send("App is running");
+  })
+
 // import express from "express";
 // const app = express();
 

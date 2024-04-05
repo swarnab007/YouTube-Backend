@@ -1,6 +1,8 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import uploadCloudinary from "../utils/fileupload.js";
 
 const register = asyncHandler(async (req, res) => {
   // get user details from frontend
@@ -15,12 +17,45 @@ const register = asyncHandler(async (req, res) => {
   }
 
   // check if user is logged in or not
-  const loggedinUser = User.findOne({
+  const loggedinUser = await User.findOne({
     $or: [{ username }, { email }],
   });
-  if(loggedinUser) {
-    throw new ApiError("user with email or username already exists");
+  if (loggedinUser) {
+    throw new ApiError(409, "user with email or username already exists");
   }
+
+  // uploading files avatar image and cover image
+  const avatarPath = req.files?.avatar[0]?.path;
+  console.log(avatarPath);
+  const coverPicPath = req.files?.avatar[0]?.path;
+
+  if (!avatarPath) {
+    throw new ApiError(400, "avatar field is required");
+  }
+  // upload on cloudinary
+  const avatarRes = await uploadCloudinary(avatarPath);
+  const coverPicRes = await uploadCloudinary(coverPicPath);
+
+  // storing the object in Db
+  const userData = await User.create({
+    username: username.toLowerCase(),
+    email,
+    password,
+    fullname,
+    avatar: avatarRes.url,
+    coverPic: coverPicRes?.url || "",
+  });
+  // check if user is created properly
+  const userCreated = await userData
+    .findById(userData._id)
+    .check("-password -refreshToken");
+
+  if (!userCreated) throw new ApiError(500, "something went wrong");
+
+  // returning the final response
+  return res
+    .status(201)
+    .json(new ApiResponse(200, userCreated, "Registered successfully"));
 });
 
 export { register };
