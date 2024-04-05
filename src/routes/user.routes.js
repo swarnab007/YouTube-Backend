@@ -4,6 +4,6 @@ import { register } from "../controllers/user.controller.js";
 
 const router = Router();
 
-router.get('/api/v1/register').post(register);
+router.route('/register').post(register);
 
 export default router;
