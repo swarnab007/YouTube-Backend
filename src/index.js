@@ -2,6 +2,7 @@ import connectToDatabase from "./db/index.js";
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 import app from "./app.js";
+import cloudinaryconnect from "./utils/cloudinaryconnect.js";
 
 const PORT = 4000;
 
@@ -16,10 +17,11 @@ connectToDatabase()
     console.log("MongoDB connection error", error);
   });
 
+
   app.get('/', (req, res) => {
     res.send("App is running");
   })
-
+cloudinaryconnect();
 // import express from "express";
 // const app = express();
 
