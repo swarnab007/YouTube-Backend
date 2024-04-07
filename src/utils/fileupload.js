@@ -9,7 +9,7 @@ const uploadCloudinary = async (localFilePath) => {
         resource_type: "auto",
       });
       // remove the file if uploaded
-      // fs.unlinkSync(localFilePath);
+      fs.unlinkSync(localFilePath);
       console.log("Flie uploaded successfully",res.url);
       return res;
     }
@@ -18,7 +18,7 @@ const uploadCloudinary = async (localFilePath) => {
     }
   } catch (error) {
     // remove the file from server
-   // fs.unlinkSync(localFilePath);
+     fs.unlinkSync(localFilePath);
      console.log("cloudinary upload error",error);
     return error;
   }

@@ -6,14 +6,13 @@ const cloudinaryconnect = async () => {
     try {
         cloudinary.config({
             //!    ########   Configuring the Cloudinary to Upload MEDIA ########
-            cloud_name: "dvbnkndyc",
-            api_key: "667753236366743",
-            api_secret: "O105zScLQvu8q24z8_M5bzziOMs",
+            cloud_name: "dsxlusxr8",
+            api_key: "267717691171762",
+            api_secret: "F4qslrONFseLUAiWqK8TVMWMdgQ",
         });
     } catch (error) {
         console.log(error);
     }
 }
-
 
 export  default  cloudinaryconnect;

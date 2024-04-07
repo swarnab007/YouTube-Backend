@@ -1,14 +1,14 @@
 import { User } from "../models/user.model.js";
-// import { ApiError } from "../utils/ApiError.js";
+import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import uploadCloudinary from "../utils/fileupload.js";
 
 const register = asyncHandler(async (req, res) => {
   // get user details from frontend
-  ;
   const { username, email, password, fullname } = req.body;
   console.log("Username = ", username);
+  console.log(req.files);
 
   // validation - not empty
   if (
@@ -25,14 +25,6 @@ const register = asyncHandler(async (req, res) => {
     throw new ApiError(409, "user with email or username already exists");
   }
 
-  // uploading files avatar image and cover image
-  // const avatarPath = req.files?.avatar[0]?.path;
-  // const coverPicPath = req.files?.coverImage[0]?.path;
-  //
-  // if (!avatarPath) {
-  //   throw new ApiError(400, "avatar field is required");
-  // }
-  // upload on cloudinary
   const avatarRes = await uploadCloudinary(req.files.avatar[0]);
   const coverPicRes = await uploadCloudinary(req.files.coverImage[0]);
   // storing the object in Db
