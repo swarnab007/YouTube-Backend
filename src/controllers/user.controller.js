@@ -1,11 +1,12 @@
 import { User } from "../models/user.model.js";
-import { ApiError } from "../utils/ApiError.js";
+// import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import uploadCloudinary from "../utils/fileupload.js";
 
 const register = asyncHandler(async (req, res) => {
   // get user details from frontend
+  ;
   const { username, email, password, fullname } = req.body;
   console.log("Username = ", username);
 
@@ -25,30 +26,31 @@ const register = asyncHandler(async (req, res) => {
   }
 
   // uploading files avatar image and cover image
-  const avatarPath = req.files?.avatar[0]?.path;
-  console.log(avatarPath);
-  const coverPicPath = req.files?.avatar[0]?.path;
-
-  if (!avatarPath) {
-    throw new ApiError(400, "avatar field is required");
-  }
+  // const avatarPath = req.files?.avatar[0]?.path;
+  // const coverPicPath = req.files?.coverImage[0]?.path;
+  //
+  // if (!avatarPath) {
+  //   throw new ApiError(400, "avatar field is required");
+  // }
   // upload on cloudinary
-  const avatarRes = await uploadCloudinary(avatarPath);
-  const coverPicRes = await uploadCloudinary(coverPicPath);
-
+  const avatarRes = await uploadCloudinary(req.files.avatar[0]);
+  const coverPicRes = await uploadCloudinary(req.files.coverImage[0]);
   // storing the object in Db
+  console.log("avatar",avatarRes);
+  console.log("cover",coverPicRes);
+
   const userData = await User.create({
     username: username.toLowerCase(),
     email,
     password,
     fullname,
     avatar: avatarRes.url,
-    coverPic: coverPicRes?.url || "",
+    coverImage: coverPicRes?.url || "",
   });
+  console.log("USERDATA=>",userData);
   // check if user is created properly
-  const userCreated = await userData
-    .findById(userData._id)
-    .check("-password -refreshToken");
+  const userCreated = await User
+    .findById(userData._id);
 
   if (!userCreated) throw new ApiError(500, "something went wrong");
 
