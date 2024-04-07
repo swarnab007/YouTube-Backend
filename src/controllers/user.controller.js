@@ -43,7 +43,7 @@ const register = asyncHandler(async (req, res) => {
     password,
     fullname,
     avatar: avatarRes.url,
-    coverPic: coverPicRes?.url || "",
+    coverImage: coverPicRes?.url || "",
   });
   // check if user is created properly
   const userCreated = await userData
