@@ -4,6 +4,22 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import uploadCloudinary from "../utils/fileupload.js";
 
+const generateAccessAndRefreshToken = async (userId) => {
+  try {
+    const userforToken = await User.findById(userId);
+    const accessToken = userforToken.generateAccessToken();
+    const refreshToken = userforToken.generateRefreshToken();
+
+    // save the refreshtoken in dataBase
+    userforToken.refreshToken = refreshToken;
+    await userforToken.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(500, "Something went wrong");
+  }
+};
+
 const register = asyncHandler(async (req, res) => {
   // get user details from frontend
   const { username, email, password, fullname } = req.body;
@@ -28,8 +44,8 @@ const register = asyncHandler(async (req, res) => {
   const avatarRes = await uploadCloudinary(req.files.avatar[0]);
   const coverPicRes = await uploadCloudinary(req.files.coverImage[0]);
   // storing the object in Db
-  console.log("avatar",avatarRes);
-  console.log("cover",coverPicRes);
+  console.log("avatar", avatarRes);
+  console.log("cover", coverPicRes);
 
   const userData = await User.create({
     username: username.toLowerCase(),
@@ -39,10 +55,9 @@ const register = asyncHandler(async (req, res) => {
     avatar: avatarRes.url,
     coverImage: coverPicRes?.url || "",
   });
-  console.log("USERDATA=>",userData);
+  console.log("USERDATA=>", userData);
   // check if user is created properly
-  const userCreated = await User
-    .findById(userData._id);
+  const userCreated = await User.findById(userData._id);
 
   if (!userCreated) throw new ApiError(500, "something went wrong");
 
@@ -52,4 +67,54 @@ const register = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, userCreated, "Registered successfully"));
 });
 
-export { register };
+const login = asyncHandler(async (req, res) => {
+  // get username and password from user
+  const { username, password } = req.body;
+  console.log(username);
+
+  // check the credentials
+  if (!username || !password)
+    return new ApiError(400, "Username and password is required");
+
+  // find the user im db
+  const userDetails = await User.findOne({
+    $or: [{ username }],
+  });
+
+  // if not found
+  if (!userDetails) {
+    return new ApiError(404, "Can not find the user");
+  }
+
+  // check the password
+  const isValidPass = await userDetails.isCorrectPassword(password);
+  if (!isValidPass) return new ApiError(401, "Password is not valid");
+
+  // generate tokens
+  const { accessToken, refreshToken } = generateAccessAndRefreshToken(
+    userDetails._id
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("Accesstoken ", accessToken, options)
+    .cookie("Refreshtoken ", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          userDetails: loggedinUser,
+          accessToken,
+          refreshToken,
+        },
+        "logged in successfully"
+      )
+    );
+});
+
+export { register, login };
